@@ -196,11 +196,21 @@ class Generator {
 			result = "";
 		case '"':
 			result = "";
-		case '`':
-			result = "";
 		case '?':
 			result = "";
 		case '-':
+			result = "";
+		case '_':
+			result = "";
+		case 39:
+			result = "";
+		case 33:
+			result = "";
+		case NIGHT:
+			result = "";
+		case DOUBLE_NIGHT:
+			result = "";
+		case SPACE:
 			result = "";
 			break;
 		default:
