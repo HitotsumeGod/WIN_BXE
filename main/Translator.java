@@ -14,6 +14,9 @@ class Translator {
 	private String toTranslate;
 	public static final String ALPHABET = "abcdefghjiklmnopqrstuvwxyz";
 	public static final String NOCK = "WIN_BXE";
+	public static final char NIGHT = '`';
+	public static final char DOUBLE_NIGHT = '@';
+	public static final char SPACE = '|';
 	
 	private String convert(char c) {
 		
@@ -170,27 +173,36 @@ class Translator {
 				result += '$';
 			result += '?';
 			break;
-		case '\s':
+		case ' ':
 			result = "";
-			break;
 		case '\t':
 			result = "";
-			break;
 		case '\n':
 			result = "";
-			break;
 		case '.':
 			result = "";
-			break;
 		case ',':
 			result = "";
-			break;
 		case '"':
+			result = "";
+		case '?':
+			result = "";
+		case '-':
+			result = "";
+		case NIGHT:
+			result = "";
+		case DOUBLE_NIGHT:
+			result = "";
+		case SPACE:
 			result = "";
 			break;
 		default:
-			System.out.println(c + "Only ALPHABET characters permitted. Quitting.");
-			System.exit(1);
+			if (Character.isWhitespace(c)) {
+				result = "";
+			} else {
+				System.out.println(c + "Only alphabet characters permitted. Quitting.");
+				System.exit(1);
+			}
 		
 		}
 		return result;
@@ -209,10 +221,9 @@ class Translator {
 	
 	private char translate(String encoded) {
 		
-		for (int i = 0; i < ALPHABET.length(); i++)
-			if (encoded.equals(convert(ALPHABET.charAt(i)))) {
+		for (int i = 0; i < ALPHABET.length(); i++) 
+			if (encoded.trim().equals(convert(ALPHABET.charAt(i)).trim())) 
 				return ALPHABET.charAt(i);
-			}
 		return '1';    //signifies error
 		
 	}
@@ -228,34 +239,42 @@ class Translator {
 	
 	public void doDecrypt() throws IOException {
 		
-		File inptf = new File("t_files/inptf");
-		File outptf = new File("t_files/outptf");
+		File inptf = new File("g_files/outptf");
+		File outptf = new File("g_files/showtptf");
 		String ss = "";
-		char sarr[];
 		toTranslate = "";
 		int it, c;
 		char put;
 		BufferedReader bfr = new BufferedReader(new FileReader(inptf));
 		BufferedWriter bwr = new BufferedWriter(new FileWriter(outptf));
 		while ((c = bfr.read()) != -1) 
-			if (c != '@')
+			if (c != DOUBLE_NIGHT)
 				toTranslate += (char) c;
-		if (!(toTranslate.substring(0, 7).equals(NOCK)))
+		if (!(toTranslate.substring(0, 7).equals(NOCK))) 
 			System.exit(1);
 		it = 7;   //begin checking characters AFTER nock
-		while (getKey(ss) == -1) {
+		while (1 == 1) {    //checks if ss fits a keygen and ONLY once it is determined that ss is equivalent to a whole codeword
+			//System.out.println(ss + " " + it);
+			//System.out.println(toTranslate.charAt(16));
+			try {
+				if (getKey(ss) != -1 && toTranslate.charAt(it + 1) == SPACE)
+					break;
+			} catch (StringIndexOutOfBoundsException e) {
+				break;
+			}
 			ss += toTranslate.charAt(it);
 			it++;
 		}
 		key = getKey(ss);
-		System.out.println(key);
-		sarr = new char[toTranslate.length()];
+		System.out.println(key + "t");
+		char[] sarr = new char[toTranslate.length()];
 		put = 49;   //ASCII for the digit '1'
 		for (int i = 7; i < toTranslate.length(); i++) {
-			sarr[i - 7] = toTranslate.charAt(i);
-			if (sarr.length >= 3) {  //save a few extra translations, given that no alphabet character corresponds to an encode of less than three characters
+			//System.out.println(sarr);
+			if (toTranslate.charAt(i) != SPACE && toTranslate.charAt(i) != NIGHT)
+				sarr[i - 7] = toTranslate.charAt(i);
+			if (sarr.length >= 3)	//save a few extra translations, given that no alphabet character corresponds to an encode of less than three characters
 				put = translate(carrToString(sarr));
-			}
 			if (put != '1') {
 				bwr.write(put);
 				sarr = new char[toTranslate.length()];   //reset the array
