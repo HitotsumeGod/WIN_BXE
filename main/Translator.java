@@ -189,6 +189,12 @@ class Translator {
 			result = "";
 		case '-':
 			result = "";
+		case '_':
+			result = "";
+		case 39:
+			result = "";
+		case 33:
+			result = "";
 		case NIGHT:
 			result = "";
 		case DOUBLE_NIGHT:
@@ -254,10 +260,8 @@ class Translator {
 			System.exit(1);
 		it = 7;   //begin checking characters AFTER nock
 		while (1 == 1) {    //checks if ss fits a keygen and ONLY once it is determined that ss is equivalent to a whole codeword
-			//System.out.println(ss + " " + it);
-			//System.out.println(toTranslate.charAt(16));
 			try {
-				if (getKey(ss) != -1 && toTranslate.charAt(it + 1) == SPACE)
+				if (getKey(ss) != -1 && toTranslate.charAt(it) == SPACE)
 					break;
 			} catch (StringIndexOutOfBoundsException e) {
 				break;
@@ -269,8 +273,8 @@ class Translator {
 		System.out.println(key + "t");
 		char[] sarr = new char[toTranslate.length()];
 		put = 49;   //ASCII for the digit '1'
+		System.out.println(toTranslate.length() - 7);
 		for (int i = 7; i < toTranslate.length(); i++) {
-			//System.out.println(sarr);
 			if (toTranslate.charAt(i) != SPACE && toTranslate.charAt(i) != NIGHT)
 				sarr[i - 7] = toTranslate.charAt(i);
 			if (sarr.length >= 3)	//save a few extra translations, given that no alphabet character corresponds to an encode of less than three characters
