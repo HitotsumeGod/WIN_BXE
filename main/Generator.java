@@ -11,8 +11,11 @@ import java.security.SecureRandom;
 
 class Generator {
 	
+	private static final char NIGHT = '`';
+	private static final char DOUBLE_NIGHT = '@';
+	private static final char SPACE = '|';
 	private static final int UPPERLIMIT = 25;
-	public static final String NOCK = "WIN_BXE";
+	private static final String NOCK = "WIN_BXE";
 	private int key;
 	private SecureRandom srand;
 	
@@ -181,27 +184,32 @@ class Generator {
 				result += '$';
 			result += '?';
 			break;
-		case '\s':
+		case ' ':
 			result = "";
-			break;
 		case '\t':
 			result = "";
-			break;
 		case '\n':
 			result = "";
-			break;
 		case '.':
 			result = "";
-			break;
 		case ',':
 			result = "";
-			break;
 		case '"':
+			result = "";
+		case '`':
+			result = "";
+		case '?':
+			result = "";
+		case '-':
 			result = "";
 			break;
 		default:
-			System.out.println(c + "Only alphabet characters permitted. Quitting.");
-			System.exit(1);
+			if (Character.isWhitespace(c)) {
+				result = "";
+			} else {
+				System.out.println(c + "Only alphabet characters permitted. Quitting.");
+				System.exit(1);
+			}
 		
 		}
 		return result;
@@ -218,7 +226,7 @@ class Generator {
 		clearit.write("");
 		clearit.close();
 		key = srand.nextInt(UPPERLIMIT) + 1;
-		System.out.println(key);
+		System.out.println(key + "g");
 		BufferedReader bfr = new BufferedReader(new FileReader(inptf));
 		BufferedWriter bwr = new BufferedWriter(new FileWriter(outptf, true));
 		while ((c = bfr.read()) != -1)
@@ -226,23 +234,25 @@ class Generator {
 		bwr.write(NOCK);
 		for (int i = 0; i < toTranslate.length(); i++) {
 			bwr.write(convert(Character.toLowerCase(toTranslate.charAt(i))));
+			for (int il = 0; il < (key + 3); il++)
+				bwr.write(SPACE);
 			int night = srand.nextInt(4);
 			switch (night) {
-			case '0':
+			case 0:
 				break;
-			case '1':
+			case 1:
 				for (int i2 = 0; i2 < (key + 14); i2++)
 					bwr.write('`');
 				break;
-			case '2':
+			case 2:
 				bwr.write("`");
 				break;
-			case '3':
+			case 3:
 				bwr.write('@');
 				break;
-			case '4':
+			case 4:
 				break;
-			case '5':
+			case 5:
 				break;
 			}
 		}

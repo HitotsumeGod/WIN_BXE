@@ -5,7 +5,7 @@ import java.io.IOException;
 public class Pilot {
 
 	public static void main(String[] args) {
-
+	
 		Generator g = new Generator();
 		Translator t = new Translator();
 		try {
