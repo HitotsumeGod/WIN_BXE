@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
-class Generator {
+class Generator implements Runnable {
 	
 	private static final char NIGHT = '`';
 	private static final char DOUBLE_NIGHT = '@';
@@ -226,7 +226,7 @@ class Generator {
 		
 	}
 	
-	public void doEncrypt() throws IOException {
+	public void run() {
 		
 		File inptf = new File("g_files/inptf");
 		File outptf = new File("g_files/outptf");
@@ -236,7 +236,6 @@ class Generator {
 		clearit.write("");
 		clearit.close();
 		key = srand.nextInt(UPPERLIMIT) + 1;
-		System.out.println(key + "g");
 		BufferedReader bfr = new BufferedReader(new FileReader(inptf));
 		BufferedWriter bwr = new BufferedWriter(new FileWriter(outptf, true));
 		while ((c = bfr.read()) != -1)

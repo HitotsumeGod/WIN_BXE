@@ -8,15 +8,27 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 
-class Translator {
+class Translator implements Runnable {
 	
+	public int progress;
 	private int key;
-	private String toTranslate;
+	private BufferedReader bfr;
+	private BufferedWriter bwr;
+	private File inptf, outptf;
 	public static final String ALPHABET = "abcdefghjiklmnopqrstuvwxyz";
 	public static final String NOCK = "WIN_BXE";
 	public static final char NIGHT = '`';
 	public static final char DOUBLE_NIGHT = '@';
 	public static final char SPACE = '|';
+	
+	Translator() {
+	
+		bfr = new BufferedReader(new FileReader(inptf));
+		bwr = new BufferedWriter(new FileWriter(outptf));
+		inptf = new File("g_files/outptf");
+		outptf = new File("g_files/showtptf");
+	
+	}
 	
 	private String convert(char c) {
 		
@@ -243,21 +255,25 @@ class Translator {
 		
 	}
 	
-	public void doDecrypt() throws IOException {
-		
-		File inptf = new File("g_files/outptf");
-		File outptf = new File("g_files/showtptf");
-		String ss = "";
-		toTranslate = "";
-		int it, c;
-		char put;
-		BufferedReader bfr = new BufferedReader(new FileReader(inptf));
-		BufferedWriter bwr = new BufferedWriter(new FileWriter(outptf));
+	public String getStringToTranslate() throws IOException {
+	
+		int c; 
+		String toTranslate = "";
 		while ((c = bfr.read()) != -1) 
 			if (c != DOUBLE_NIGHT)
 				toTranslate += (char) c;
 		if (!(toTranslate.substring(0, 7).equals(NOCK))) 
 			System.exit(1);
+		return toTranslate;
+	
+	}
+	
+	public void run() {
+		
+		String ss = "";
+		int it;
+		char put;
+		String toTranslate = getStringToTranslate();
 		it = 7;   //begin checking characters AFTER nock
 		while (1 == 1) {    //checks if ss fits a keygen and ONLY once it is determined that ss is equivalent to a whole codeword
 			try {
@@ -270,22 +286,19 @@ class Translator {
 			it++;
 		}
 		key = getKey(ss);
-		System.out.println(key + "t");
 		char[] sarr = new char[toTranslate.length()];
 		put = 49;   //ASCII for the digit '1'
-		System.out.println(toTranslate.length() - 7);
-		for (int i = 7; i < toTranslate.length(); i++) {
-			if (toTranslate.charAt(i) != SPACE && toTranslate.charAt(i) != NIGHT)
-				sarr[i - 7] = toTranslate.charAt(i);
+		for (int progress = 7; progress < toTranslate.length(); progress++) {
+			if (toTranslate.charAt(progress) != SPACE && toTranslate.charAt(progress) != NIGHT)
+				sarr[progress - 7] = toTranslate.charAt(progress);
 			if (sarr.length >= 3)	//save a few extra translations, given that no alphabet character corresponds to an encode of less than three characters
 				put = translate(carrToString(sarr));
 			if (put != '1') {
 				bwr.write(put);
 				sarr = new char[toTranslate.length()];   //reset the array
 			}
+			
 		}
-		bfr.close();
-		bwr.close();
 		
 	}
 	
