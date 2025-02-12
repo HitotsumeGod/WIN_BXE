@@ -18,14 +18,16 @@ class Generator implements Runnable {
 	private static final String NOCK = "WIN_BXE";
 	private int key;
 	private SecureRandom srand;
+	private final Screen screen;
 	
-	Generator() {
+	Generator(Screen screen) {
 		
 		try {
 			srand = SecureRandom.getInstanceStrong();
 		} catch (NoSuchAlgorithmException na) {
 			na.printStackTrace();
 		}
+		this.screen = screen;
 		
 	}
 	
@@ -228,6 +230,7 @@ class Generator implements Runnable {
 	
 	public void run() {
 		
+		try {
 		File inptf = new File("g_files/inptf");
 		File outptf = new File("g_files/outptf");
 		String toTranslate = "";
@@ -265,9 +268,9 @@ class Generator implements Runnable {
 				break;
 			}
 		}
-		bfr.close();
-		bwr.close();
-		
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 	}
 

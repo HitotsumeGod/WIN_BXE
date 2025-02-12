@@ -11,7 +11,6 @@ class Screen extends JFrame {
 	private Translator t;
 	private JPanel barPanel;
 	private JProgressBar prog;
-	private final Screen instance;
 
 	private class Actioner implements ActionListener {
 	
@@ -42,7 +41,7 @@ class Screen extends JFrame {
 					endTime = System.currentTimeMillis();
 					System.out.println("Data decrypted in " + (endTime - startTime) / 1000 + " seconds.");
 				}
-			} catch (IOException i) {
+			} catch (InterruptedException i) {
 				i.printStackTrace();
 			}
 		
@@ -51,8 +50,13 @@ class Screen extends JFrame {
 	}
 
 	Screen() {
-	
-		instance = this;
+		
+		try {
+			g = new Generator(this);
+			t = new Translator(this);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		JPanel textPanel = new JPanel();
 		JPanel buttonPanel = new JPanel();
 		JLabel l1 = new JLabel("WIN_BXE TRANSLATOR/GENERATOR");
@@ -66,8 +70,8 @@ class Screen extends JFrame {
 		translate.setName("translate");
 		generate.setFont(newFont);
 		translate.setFont(newFont);
-		generate.addActionListener(new Actioner(generate));
-		translate.addActionListener(new Actioner(translate));
+		generate.addActionListener(new Actioner(this, generate));
+		translate.addActionListener(new Actioner(this, translate));
 		textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
 		buttonPanel.setLayout(new FlowLayout());
 		textPanel.add(l1);
@@ -84,13 +88,7 @@ class Screen extends JFrame {
 
 	}
 	
-	public void getInstance() {
-	
-		return instance;
-	
-	}
-	
-	public void getBar() {
+	public JProgressBar getBar() {
 	
 		return prog;
 	

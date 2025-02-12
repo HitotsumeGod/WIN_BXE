@@ -15,18 +15,20 @@ class Translator implements Runnable {
 	private BufferedReader bfr;
 	private BufferedWriter bwr;
 	private File inptf, outptf;
+	private final Screen screen;
 	public static final String ALPHABET = "abcdefghjiklmnopqrstuvwxyz";
 	public static final String NOCK = "WIN_BXE";
 	public static final char NIGHT = '`';
 	public static final char DOUBLE_NIGHT = '@';
 	public static final char SPACE = '|';
 	
-	Translator() {
+	Translator(Screen screen) throws IOException {
 	
-		bfr = new BufferedReader(new FileReader(inptf));
-		bwr = new BufferedWriter(new FileWriter(outptf));
 		inptf = new File("g_files/outptf");
 		outptf = new File("g_files/showtptf");
+		bfr = new BufferedReader(new FileReader(inptf));
+		bwr = new BufferedWriter(new FileWriter(outptf));
+		this.screen = screen;
 	
 	}
 	
@@ -270,6 +272,7 @@ class Translator implements Runnable {
 	
 	public void run() {
 		
+		try {
 		String ss = "";
 		int it;
 		char put;
@@ -297,7 +300,11 @@ class Translator implements Runnable {
 				bwr.write(put);
 				sarr = new char[toTranslate.length()];   //reset the array
 			}
+			screen.getBar().setValue(progress - 7);
 			
+		}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		
 	}
