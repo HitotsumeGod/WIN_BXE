@@ -1,6 +1,7 @@
-package main;
+package Translator.main;
 
 import java.io.IOException;
+import java.io.Console;
 
 public class Pilot {
 
@@ -8,10 +9,8 @@ public class Pilot {
 		
 		Console con = System.console();
 		final long startTime = System.currentTimeMillis();
-		Generator g = new Generator();
 		Translator t = new Translator();
 		try {
-			g.doEncrypt();
 			t.doDecrypt();
 		} catch (IOException e) {
 			e.printStackTrace();

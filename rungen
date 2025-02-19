@@ -1,0 +1,7 @@
+#!/bin/bash
+
+read message
+echo $message > Generator/inptf
+javac Generator/main/*.java
+java Generator/main/Pilot
+cat Generator/outptf
