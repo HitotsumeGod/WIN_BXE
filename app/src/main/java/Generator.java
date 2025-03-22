@@ -1,35 +1,32 @@
-package main;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
-class Translator implements Runnable {
+class Generator implements Runnable {
 	
-	public int progress;
+	private static final char NIGHT = '`';
+	private static final char DOUBLE_NIGHT = '@';
+	private static final char SPACE = '|';
+	private static final int UPPERLIMIT = 25;
+	private static final String NOCK = "WIN_BXE";
 	private int key;
-	private BufferedReader bfr;
-	private BufferedWriter bwr;
-	private File inptf, outptf;
+	private SecureRandom srand;
 	private final Screen screen;
-	public static final String ALPHABET = "abcdefghjiklmnopqrstuvwxyz";
-	public static final String NOCK = "WIN_BXE";
-	public static final char NIGHT = '`';
-	public static final char DOUBLE_NIGHT = '@';
-	public static final char SPACE = '|';
 	
-	Translator(Screen screen) throws IOException {
-	
-		inptf = new File("g_files/outptf");
-		outptf = new File("g_files/showtptf");
-		bfr = new BufferedReader(new FileReader(inptf));
-		bwr = new BufferedWriter(new FileWriter(outptf));
+	Generator(Screen screen) {
+		
+		try {
+			srand = SecureRandom.getInstanceStrong();
+		} catch (NoSuchAlgorithmException na) {
+			na.printStackTrace();
+		}
 		this.screen = screen;
-	
+		
 	}
 	
 	private String convert(char c) {
@@ -228,85 +225,51 @@ class Translator implements Runnable {
 		return result;
 		
 	}
-
-	private int getKey(String s) {
-		
-		for (int i = 0; i < ALPHABET.length(); i++)
-			for (key = 1; key < 26; key++) 
-				if (s.equals(convert(ALPHABET.charAt(i)))) 
-					return key;
-		return -1;
-
-	}
-	
-	private char translate(String encoded) {
-		
-		for (int i = 0; i < ALPHABET.length(); i++) 
-			if (encoded.trim().equals(convert(ALPHABET.charAt(i)).trim())) 
-				return ALPHABET.charAt(i);
-		return '1';    //signifies error
-		
-	}
-	
-	private String carrToString(char[] arr) {
-		
-		String result = "";
-		for (char c : arr)
-			result += c;
-		return result;
-		
-	}
-	
-	public String getStringToTranslate() throws IOException {
-	
-		int c; 
-		String toTranslate = "";
-		while ((c = bfr.read()) != -1) 
-			if (c != DOUBLE_NIGHT)
-				toTranslate += (char) c;
-		if (!(toTranslate.substring(0, 7).equals(NOCK))) 
-			System.exit(1);
-		return toTranslate;
-	
-	}
 	
 	public void run() {
 		
 		try {
-		String ss = "";
-		int it;
-		char put;
-		String toTranslate = getStringToTranslate();
-		it = 7;   //begin checking characters AFTER nock
-		while (1 == 1) {    //checks if ss fits a keygen and ONLY once it is determined that ss is equivalent to a whole codeword
-			try {
-				if (getKey(ss) != -1 && toTranslate.charAt(it) == SPACE)
-					break;
-			} catch (StringIndexOutOfBoundsException e) {
+		File inptf = new File("src/main/resources/inptf");
+		File outptf = new File("src/main/resources/outptf");
+		String toTranslate = "";
+		int c;
+		FileWriter clearit = new FileWriter(outptf);
+		clearit.write("");
+		clearit.close();
+		key = srand.nextInt(UPPERLIMIT) + 1;
+		BufferedReader bfr = new BufferedReader(new FileReader(inptf));
+		BufferedWriter bwr = new BufferedWriter(new FileWriter(outptf, true));
+		while ((c = bfr.read()) != -1)
+			toTranslate += (char) c;
+		bwr.write(NOCK);
+		for (int i = 0; i < toTranslate.length(); i++) {
+			bwr.write(convert(Character.toLowerCase(toTranslate.charAt(i))));
+			for (int il = 0; il < (key + 3); il++)
+				bwr.write(SPACE);
+			int night = srand.nextInt(4);
+			switch (night) {
+			case 0:
+				break;
+			case 1:
+				for (int i2 = 0; i2 < (key + 14); i2++)
+					bwr.write('`');
+				break;
+			case 2:
+				bwr.write("`");
+				break;
+			case 3:
+				bwr.write('@');
+				break;
+			case 4:
+				break;
+			case 5:
 				break;
 			}
-			ss += toTranslate.charAt(it);
-			it++;
-		}
-		key = getKey(ss);
-		char[] sarr = new char[toTranslate.length()];
-		put = 49;   //ASCII for the digit '1'
-		for (int progress = 7; progress < toTranslate.length(); progress++) {
-			if (toTranslate.charAt(progress) != SPACE && toTranslate.charAt(progress) != NIGHT)
-				sarr[progress - 7] = toTranslate.charAt(progress);
-			if (sarr.length >= 3)	//save a few extra translations, given that no alphabet character corresponds to an encode of less than three characters
-				put = translate(carrToString(sarr));
-			if (put != '1') {
-				bwr.write(put);
-				sarr = new char[toTranslate.length()];   //reset the array
-			}
-			screen.getBar().setValue(progress - 7);
-			
 		}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 	}
-	
+
 }

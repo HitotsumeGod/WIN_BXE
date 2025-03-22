@@ -1,8 +1,3 @@
-package main;
-
-import java.io.IOException;
-import java.io.Console;
-
 public class Pilot {
 
 	public static void main(String[] args) {
