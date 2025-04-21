@@ -3,13 +3,19 @@
 
 #include <stdint.h>
 
-#define NIGHT '`'
-#define DOUBLE_NIGHT '@'
-#define SPACE '|'
-#define CAPITALIZE(c) ((c > 64 && c < 91) ? ((c) + 32) : (c))
-#define LOWERCASE(c) ((c > 96 && c < 123) ? (c - 32 : c))
+#define RANDOMRANGE(max, min) rand() % (max + 1 - min) + min
 
 #ifndef AXXC_LOL
+	#define NIGHT '`'
+	#define DOUBLE_NIGHT '@'
+	#define SPACE '|'
+	#define CAPITALIZE(c) c - 32
+	#define LOWERCASE(c) c + 32
+	#define KEY_MAX 50
+	#define KEY_MIN 2
+	#define G_INPTF_PATH "res/g_inptf.bxe"
+	#define G_OUTPTF_PATH "res/g_outptf.bxe"
+	
 	#define BXE_A(key, decipherable) 					\
 		cs = 0;								\
 		*(decipherable + (cs++)) = '<';					\
@@ -229,13 +235,15 @@
 		*(decipherable + cs) = '\0';
 		
 #endif
+
 typedef uint8_t key_bxe;
 
-//const char ALPHABET[26] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+extern const char *alphabet;
 
+extern void set_random_key(void);
 extern void prep_file(char *filename);
-extern char *read_from_inptf(void);
-extern void write_to_outptf(char *buffer_read);
+extern char **read_from_inptf(void);
+extern void write_to_outptf(char **buffer_read);
 char *pls_encipher(char tocipher, key_bxe key);
 char pls_decipher(char *deciferable, key_bxe key);
 key_bxe determine_key(char *deciferable); 

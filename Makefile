@@ -2,9 +2,15 @@
 CC=gcc
 SRC=src/main
 DEPS=src/headers
+RES=res
 SRS=$(SRC)/pilot.c $(SRC)/generator.c
 
-pilot: $(SRS)
-	$(CC) -o $@ $^ -I $(DEPS)
-clean: pilot
-	rm -f $^
+pilot: $(SRS) $(DEPS) $(RES)
+	$(CC) -o $@ $(SRS) -I $(DEPS)
+$(RES):
+	if ! [ -d $@ ]; then		\
+		mkdir $@;		\
+	fi
+clean: 
+	rm -f pilot
+	rm -rf res
