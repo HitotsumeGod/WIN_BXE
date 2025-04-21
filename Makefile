@@ -1,16 +1,25 @@
 #makec generated makefile
 CC=gcc
+ED=gedit
 SRC=src/main
 DEPS=src/headers
 RES=res
-SRS=$(SRC)/pilot.c $(SRC)/generator.c
+GS=$(SRC)/generator/pilot.c $(SRC)/generator/generator.c $(SRC)/translator/translator.c
 
-pilot: $(SRS) $(DEPS) $(RES)
-	$(CC) -o $@ $(SRS) -I $(DEPS)
+all: generator translator
+generator: $(GS) $(DEPS) $(RES)
+	$(CC) -o $@ $(GS) -I $(DEPS)
+translator: $(DEPS) $(RES)
+	$(CC) -o $@ $(SRC)/translator/pilot.c $(SRC)/translator/translator.c -I $(DEPS)
+edit:
+	gedit src/main/generator/*.c &
+	gedit src/main/translator/*.c 
+	gedit src/headers/*
 $(RES):
 	if ! [ -d $@ ]; then		\
 		mkdir $@;		\
 	fi
 clean: 
-	rm -f pilot
+	rm -f generator
+	rm -f translator
 	rm -rf res

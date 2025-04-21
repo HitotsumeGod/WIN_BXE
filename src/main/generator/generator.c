@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 #include "bxe.h"
 
-const char *alphabet = "abcdefghijklmnopqrstuvwxyz";
 key_bxe tkey;
 
-void set_random_key(void) { tkey = RANDOMRANGE(KEY_MAX, KEY_MIN); printf("Random key is %d\n", tkey); }
+void set_random_key(void) { srand(time(NULL)); tkey = RANDOMRANGE(KEY_MAX, KEY_MIN); printf("Random key is %d\n", tkey); }
 
 void prep_file(char *fname) {
 
@@ -214,6 +214,7 @@ char *pls_encipher(char c, key_bxe k) {
 			BXE_Z(k, str);
 			break;
 		default:
+			fprintf(stderr, "%s\n", "kinda sorta maybe");
 			str = "";
 	}
 	return str;

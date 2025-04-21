@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
 	printf("%s\n", "Input file prepped.");
 	prim = read_from_inptf();
 	printf("%s\n", "Reading complete.");
+	printf("Determiner found key %d\n", determine_key(*prim));
 	write_to_outptf(prim);
 	printf("%s\n", "Execution completed.");
 	return 0;
