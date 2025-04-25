@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
 #include <time.h>
 #include "bxe.h"
@@ -70,7 +71,10 @@ char **read_from_inptf(void) {
 		exit(EXIT_FAILURE);
 	}
 	if ((f = fopen(G_INPTF_PATH, "r")) == NULL) {
-		perror("fopen err");
+		if (errno = ENOENT)
+			fprintf(stderr, "%s\n", "No file to translate! Maybe run the generator first to make some enciphered text?");
+		else
+			perror("fopen err");
 		exit(EXIT_FAILURE);
 	}
 	while ((c = fgetc(f)) != EOF) {
