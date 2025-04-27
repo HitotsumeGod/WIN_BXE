@@ -9,9 +9,9 @@ TS=$(SRC)/translator/pilot.c $(SRC)/translator/translator.c
 
 all: generator translator
 generator: $(GS) $(DEPS) $(RES)
-	$(CC) -o $@ $(GS) -I $(DEPS)
+	$(CC) -o $@ $(GS) -I $(DEPS) -g
 translator: $(TS) $(DEPS) $(RES)
-	$(CC) -o $@ $(TS) -I $(DEPS)
+	$(CC) -o $@ $(TS) -I $(DEPS) -g
 edit:
 	gedit src/main/generator/*.c &
 	gedit src/main/translator/*.c 

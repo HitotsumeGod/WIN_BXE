@@ -11,6 +11,7 @@ key_bxe determine_key(char *decipherable) {
 	char *tofree;
 	key_bxe k = 0;
 
+	printf("%s\n", decipherable);
 	for (int i = KEY_MIN; i <= KEY_MAX; i++) 
 		for (int il = 0; il < strlen(alphabet); il++) {
 			if (strcmp(decipherable, (tofree = pls_encipher(*(alphabet + il), i))) == 0) {
@@ -43,13 +44,13 @@ char **read_from_inptf(void) {
 	int c, n, m, b, d;
 	
 	b = 0;
-	m = d = 2;
+	d = 2;
 	if ((fbuf = malloc(sizeof(char *) * d)) == NULL) {
 		perror("malloc err");
 		exit(EXIT_FAILURE);
 	}
-	for (int i = 0; i < m; i++)
-		if ((*(fbuf + i) = malloc(sizeof(char) * m)) == NULL) {
+	for (int i = 0; i < d; i++)
+		if ((*(fbuf + i) = malloc(sizeof(char) * d)) == NULL) {
 			perror("malloc err");
 			exit(EXIT_FAILURE);
 		}
@@ -61,22 +62,23 @@ char **read_from_inptf(void) {
 		exit(EXIT_FAILURE);
 	}
 	while ((c = fgetc(f)) != EOF) {				//OUTER LOOP CHECKING FOR END OF FILE
-		printf("%s\n", "startloop");
-		if (ungetc(c, f) == EOF) {
-			perror("ungetc err");
-			exit(EXIT_FAILURE);
-		}
+		n = 0;
+		m = 2;
+		ungetc(c, f);
 		if (b == d) {
 			if ((fdummy = realloc(fbuf, sizeof(char *) * (d *= 2))) == NULL) {
 				perror("realloc err");
 				exit(EXIT_FAILURE);
 			}
 			fbuf = fdummy;
+			for (int i = d / 2; i < d; i++)
+				if ((*(fbuf + i) = malloc(sizeof(char) * m)) == NULL) {
+					perror("malloc err");
+					exit(EXIT_FAILURE);
+			}
 		}
 		n = 0;
-		printf("%s\n", "writechecker");
 		while ((c = fgetc(f)) != SPACE) {		//INNER LOOP CHECKING FOR END OF CIPHERED WORD
-		printf("%d\t", n);
 			if (n == m) {
 				if ((dummy = realloc(*(fbuf + b), sizeof(char) * (m *= 2))) == NULL) {
 					perror("realloc err");
@@ -86,14 +88,18 @@ char **read_from_inptf(void) {
 			}
 			*(*(fbuf + b) + (n++)) = c;
 		}
-		printf("\n%s\n", "gangsucess!");
 		while ((c = fgetc(f)) == SPACE);
-		if (ungetc(c, f) == EOF) {
-			perror("ungetc err");
-			exit(EXIT_FAILURE);
-		}
+		ungetc(c, f);
 		b++;
 	}
+	if (b == d) {
+		if ((fdummy = realloc(fbuf, sizeof(char *) * d + 1)) == NULL) {
+			perror("realloc err");
+			exit(EXIT_FAILURE);
+		}
+		fbuf = fdummy;
+	}
+	*(fbuf + b) = "\0";	
 	if (fclose(f) == -1) {
 		perror("fclose err");
 		exit(EXIT_FAILURE);
@@ -102,15 +108,46 @@ char **read_from_inptf(void) {
 
 }
 
-void write_to_outptf(char **red) {
+void write_to_outptf(char **read) {
 
 	FILE *f;
+	key_bxe k;
+	char *deciphered, *temp, *dummy, c;
+	int n, m, b, e;
 	
+	n = b = e = 0;
+	m = 2;
+	printf("%d\n", ((k = determine_key(*read))));
 	if ((f = fopen(T_OUTPTF_PATH, "w")) == NULL) {
 		perror("fopen err");
 		exit(EXIT_FAILURE);
 	}
-	
+	if ((deciphered = malloc(sizeof(char) * m)) == NULL) {
+		perror("malloc err");
+		exit(EXIT_FAILURE);
+	}
+	while (strcmp((temp = *(read + (b++))), "\0") == 1) {
+		if (n == m) {
+			if ((dummy = realloc(deciphered, sizeof(char) * (m *= 2))) == NULL) {
+				perror("realloc err");
+				exit(EXIT_FAILURE);
+			}
+			deciphered = dummy;				
+		}
+		*(deciphered + (n++)) = pls_decipher(temp, k);	
+		free(temp);
+	}
+	free(read);
+	*(deciphered + n) = '\0';
+	if (fputs(deciphered, f) == -1) {
+		perror("fputs err");
+		exit(EXIT_FAILURE);
+	}
+	free(deciphered);
+	if (fclose(f) == -1) {
+		perror("fclose err");
+		exit(EXIT_FAILURE);
+	}
 
 }
 

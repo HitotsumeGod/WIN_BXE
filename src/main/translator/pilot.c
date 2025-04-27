@@ -5,6 +5,7 @@
 
 int main(int argc, char *argv[]) {
 
-	read_from_inptf();
+	write_to_outptf(read_from_inptl());
+	return 0;
 
 }

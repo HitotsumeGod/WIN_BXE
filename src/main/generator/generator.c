@@ -58,23 +58,17 @@ void prep_file(char *fname) {
 
 }
 
-char **read_from_inptf(void) {
+size_t read_from_inptf(char **buf) {
 
 	FILE *f;
-	char *fbuf, *fdummy, **ciphered;
+	char *fbuf, *fdummy;
 	int c, n, m;
 	
+	fbuf = *buf;
 	n = 0;
 	m = 2;
-	if ((fbuf = malloc(sizeof(char) * m)) == NULL) {
-		perror("malloc err");
-		exit(EXIT_FAILURE);
-	}
 	if ((f = fopen(G_INPTF_PATH, "r")) == NULL) {
-		if (errno = ENOENT)
-			fprintf(stderr, "%s\n", "No file to translate! Maybe run the generator first to make some enciphered text?");
-		else
-			perror("fopen err");
+		perror("fopen err");
 		exit(EXIT_FAILURE);
 	}
 	while ((c = fgetc(f)) != EOF) {
@@ -85,42 +79,48 @@ char **read_from_inptf(void) {
 			}
 			fbuf = fdummy;
 		}
-		if (c != '\n')
+		if (c != '\n') 
 			*(fbuf + (n++)) = c;
 	}
-	if ((ciphered = malloc(sizeof(char *) * (n + 1))) == NULL) {			//ADDITIONAL STRING FOR THE NULLT STRING
-		perror("malloc err");
-		exit(EXIT_FAILURE);
-	}
-	for (int i = 0; i < n; i++) 
-		*(ciphered + i) = pls_encipher(*(fbuf + i), tkey);
-	*(ciphered + n) = "\0";
-	free(fbuf);
-	return ciphered;
+	return (size_t) n;
 
 }
 
-void write_to_outptf(char **buf) {
+void write_to_outptf(char *buf, size_t bufsize) {
 
 	FILE *f;
+	char **ciphered, *enciphered;
 	int n;
-	size_t buflen;
 	
 	n = 0;
+	if ((ciphered = malloc(sizeof(char *) * bufsize + 1)) == NULL) {
+		perror("malloc err");
+		exit(EXIT_FAILURE);
+	}
+	for (int i = 0; i < bufsize; i++) {
+		enciphered = pls_encipher(*(buf + i), tkey);
+		if ((*(ciphered + bufsize) = malloc(sizeof(char) * strlen(enciphered) + 1)) == NULL) {
+			perror("malloc err");
+			exit(EXIT_FAILURE);
+		}
+		strcpy(*(ciphered + bufsize), enciphered);
+		free(enciphered);
+	}
+	*(ciphered + n) = "\0";
 	if ((f = fopen(G_OUTPTF_PATH, "w")) == NULL) {
 		perror("fopen err");
 		exit(EXIT_FAILURE);
 	}
-	while (strcmp("\0", *(buf + (n++))) != 0);
-	buflen = --n;
-	for (int i = 0; i < buflen; i++) {
-		if (fputs(*(buf + i), f) == EOF) {
+	for (int i = 0; i < bufsize; i++) {
+		if (fputs(*(ciphered + i), f) == EOF) {
 			perror("fputs err");
 			exit(EXIT_FAILURE);
 		}
-		free(*(buf + i));
+		for (int il = 0; il < tkey / 2 + 1; il++)
+			fputc(SPACE, f);
+		free(*(ciphered + i));
 	}
-	free(buf);
+	free(ciphered);
 	if (fclose(f) == -1) {
 		perror("fclose err");
 		exit(EXIT_FAILURE);
