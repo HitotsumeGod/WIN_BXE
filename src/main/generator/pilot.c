@@ -1,24 +1,22 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include "pprocessor.h"
 #include "bxe.h"
 
 #define AXXC_LOL
 
 int main(int argc, char *argv[]) {
 	
+	amounts *ab;
 	char **prim;
-	
-	if (argc != 2) {
-		printf("%s\n", "2 args bruh");
-		return 1;	
+
+	if ((ab = file_to_strings("h", NULL, &prim)) == NULL) {
+		fprintf(stderr, "File_to_strings err : %d\n", errno);
+		return -1;
 	}
-	set_random_key();
-	printf("%s\n", "Random key set.");
-	prep_file(argv[1]);
-	printf("%s\n", "Input file prepped.");
-	prim = read_from_inptf();
-	printf("%s\n", "Reading complete.");
-	write_to_outptf(prim);
-	printf("%s\n", "Execution completed.");
+	for (int i = 0; i < ab -> strsize; i++)
+		printf("%s\n", *(prim + i));
 	return 0;
 
 }

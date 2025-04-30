@@ -58,47 +58,6 @@ void prep_file(char *fname) {
 
 }
 
-char **read_from_inptf(void) {
-
-	FILE *f;
-	char *fbuf, *fdummy, **ciphered;
-	int c, n, m;
-	
-	n = 0;
-	m = 2;
-	if ((fbuf = malloc(sizeof(char) * m)) == NULL) {
-		perror("malloc err");
-		exit(EXIT_FAILURE);
-	}
-	if ((f = fopen(G_INPTF_PATH, "r")) == NULL) {
-		if (errno = ENOENT)
-			fprintf(stderr, "%s\n", "No file to translate! Maybe run the generator first to make some enciphered text?");
-		else
-			perror("fopen err");
-		exit(EXIT_FAILURE);
-	}
-	while ((c = fgetc(f)) != EOF) {
-		if (n == m) {
-			if ((fdummy = realloc(fbuf, sizeof(char) * (m *= 2))) == NULL) {
-				perror("realloc err");
-				exit(EXIT_FAILURE);
-			}
-			fbuf = fdummy;
-		}
-		if (c != '\n')
-			*(fbuf + (n++)) = c;
-	}
-	if ((ciphered = malloc(sizeof(char *) * (n + 1))) == NULL) {			//ADDITIONAL STRING FOR THE NULLT STRING
-		perror("malloc err");
-		exit(EXIT_FAILURE);
-	}
-	for (int i = 0; i < n; i++) 
-		*(ciphered + i) = pls_encipher(*(fbuf + i), tkey);
-	*(ciphered + n) = "\0";
-	free(fbuf);
-	return ciphered;
-
-}
 
 void write_to_outptf(char **buf) {
 

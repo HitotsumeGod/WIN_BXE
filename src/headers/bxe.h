@@ -273,7 +273,6 @@ extern const char *alphabet;
 
 extern void set_random_key(void);
 extern void prep_file(char *filename);
-extern char **read_from_inptf(void);
 extern void write_to_outptf(char **buffer_read);
 char *pls_encipher(char tocipher, key_bxe key);
 char pls_decipher(char *deciferable, key_bxe key);

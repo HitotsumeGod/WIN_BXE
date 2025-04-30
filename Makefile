@@ -2,14 +2,15 @@
 CC=gcc
 ED=gedit
 SRC=src/main
-DEPS=src/headers
+DEPS=src/headers -I /usr/local/include
 RES=res
+LIBPATH=/usr/local/lib
 GS=$(SRC)/generator/pilot.c $(SRC)/generator/generator.c
 TS=$(SRC)/translator/pilot.c $(SRC)/translator/translator.c
 
 all: generator translator
-generator: $(GS) $(DEPS) $(RES)
-	$(CC) -o $@ $(GS) -I $(DEPS)
+generator: $(GS) $(RES)
+	$(CC) -o $@ $(GS) -I $(DEPS) -L $(LIBPATH) -lsprocr
 translator: $(TS) $(DEPS) $(RES)
 	$(CC) -o $@ $(TS) -I $(DEPS)
 edit:
