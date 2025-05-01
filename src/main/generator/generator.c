@@ -38,10 +38,10 @@ void prep_file(char *fname) {
 		perror("fclose err");
 		exit(EXIT_FAILURE);
 	}
-	/*if (unlink(fname) == -1) {
+	if (unlink(fname) == -1) {
 		perror("unlink err");
 		exit(EXIT_FAILURE);
-	}*/
+	}
 	if ((f = fopen(G_INPTF_PATH, "wb")) == NULL) {
 		perror("fopen err");
 		exit(EXIT_FAILURE);
@@ -59,27 +59,42 @@ void prep_file(char *fname) {
 }
 
 
-void write_to_outptf(char **buf) {
+void write_to_outptf(char *buf, amounts *a) {
 
 	FILE *f;
+	char **enciphered_strs;
 	int n;
-	size_t buflen;
 	
-	n = 0;
+	if ((enciphered_strs = malloc(sizeof(char *) * (a -> strsize * 2))) == NULL) {
+		perror("malloc err");
+		exit(EXIT_FAILURE);
+	}
 	if ((f = fopen(G_OUTPTF_PATH, "w")) == NULL) {
 		perror("fopen err");
 		exit(EXIT_FAILURE);
 	}
-	while (strcmp("\0", *(buf + (n++))) != 0);
-	buflen = --n;
-	for (int i = 0; i < buflen; i++) {
-		if (fputs(*(buf + i), f) == EOF) {
+	n = 0;
+	for (int i = 0; i < a -> strsize; i++) {
+		if (*(buf + i) < 123 && *(buf + i) > 96) 
+			if (fputs((*(enciphered_strs + (n++)) = pls_encipher(CAPITALIZE(*(buf + i)), tkey)), f) == EOF) {
+				perror("fputs err");
+				exit(EXIT_FAILURE);
+			}
+		else if (*(buf + i) < 91 && *(buf + i) > 64) 
+			if (fputs((*(enciphered_strs + (n++)) = pls_encipher(LOWERCASE(*(buf + i)), tkey)), f) == EOF) {
+				perror("fputs err");
+				exit(EXIT_FAILURE);
+			}
+		if (fputs((*(enciphered_strs + (n++)) = pls_encipher(NIGHT, tkey)), f) == EOF) {
 			perror("fputs err");
 			exit(EXIT_FAILURE);
 		}
-		free(*(buf + i));
 	}
+	for (int i = 0; i < n; i++)
+		free(*(enciphered_strs + i));
+	free(enciphered_strs);
 	free(buf);
+	free(a);
 	if (fclose(f) == -1) {
 		perror("fclose err");
 		exit(EXIT_FAILURE);
@@ -97,7 +112,7 @@ char *pls_encipher(char c, key_bxe k) {
 		perror("malloc err");
 		exit(EXIT_FAILURE);
 	}
-	switch (CAPITALIZE(c)) {
+	switch (c) {
 		case 'A':
 			BXE_A(k, str);
 			break;
@@ -175,6 +190,9 @@ char *pls_encipher(char c, key_bxe k) {
 			break;
 		case 'Z':
 			BXE_Z(k, str);
+			break;
+		case NIGHT:
+			BXE_NIGHT(k, str);
 			break;
 		default:
 			fprintf(stderr, "%s\n", "kinda sorta maybe");

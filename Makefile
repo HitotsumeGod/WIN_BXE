@@ -1,6 +1,6 @@
 #makec generated makefile
 CC=gcc
-ED=gedit
+ED=subl
 SRC=src/main
 DEPS=src/headers -I /usr/local/include
 RES=res
@@ -10,13 +10,13 @@ TS=$(SRC)/translator/pilot.c $(SRC)/translator/translator.c
 
 all: generator translator
 generator: $(GS) $(RES)
-	$(CC) -o $@ $(GS) -I $(DEPS) -L $(LIBPATH) -lsprocr
+	$(CC) -o $@ $(GS) -I $(DEPS) -L $(LIBPATH) -lsprocr -g
 translator: $(TS) $(DEPS) $(RES)
 	$(CC) -o $@ $(TS) -I $(DEPS)
 edit:
-	gedit src/main/generator/*.c &
-	gedit src/main/translator/*.c 
-	gedit src/headers/*
+	$(ED) src/main/generator/*.c &
+	$(ED) src/main/translator/*.c 
+	$(ED) src/headers/*
 $(RES):
 	if ! [ -d $@ ]; then		\
 		mkdir $@;		\
