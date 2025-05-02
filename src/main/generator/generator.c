@@ -10,6 +10,34 @@ key_bxe tkey;
 
 void set_random_key(void) { srand(time(NULL)); tkey = RANDOMRANGE(KEY_MAX, KEY_MIN); printf("Random key is %d\n", tkey); }
 
+realloc_mode pick_realloc_mode(void) {
+
+	FILE *f;
+	long fsize;
+	realloc_mode edna;
+
+	if ((f = fopen(G_INPTF_PATH, "r")) == NULL) {
+		perror("fopen err");
+		exit(EXIT_FAILURE);
+	}
+	if (fseek(f, 0, SEEK_END) == -1) {
+		perror("fseek err");
+		exit(EXIT_FAILURE);
+	}
+	fsize = ftell(f);
+	if (fclose(f) == -1) {
+		perror("fclose err");
+		exit(EXIT_FAILURE);
+	}
+
+	if (fsize <= 1000000) {
+		set_realloc_mode(DOUBLE);
+	} else 
+		set_realloc_mode(PLUS_TWO);
+	return edna;
+
+}
+
 void prep_file(char *fname) {
 
 	FILE* f;
@@ -59,7 +87,7 @@ void prep_file(char *fname) {
 }
 
 
-void write_to_outptf(char *buf, amounts *a) {
+void gen_write(char *buf, amounts *a) {
 
 	FILE *f;
 	char **enciphered_strs;

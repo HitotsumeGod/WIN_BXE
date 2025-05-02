@@ -4,7 +4,7 @@
 #include <errno.h>
 #include "bxe.h"
 
-const char *alphabet = "abcdefghijklmnopqrstuvwxyz";
+const char *alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 key_bxe determine_key(char *decipherable) {
 
@@ -36,78 +36,30 @@ char pls_decipher(char *decipherable, key_bxe k) {
 
 }
 
-char **read_from_inptf(void) {
+void trans_write(char **buf, amounts *a) {
 
 	FILE *f;
-	char **fbuf, **fdummy, *dummy;
-	int c, n, m, b, d;
-	
-	b = 0;
-	m = d = 2;
-	if ((fbuf = malloc(sizeof(char *) * d)) == NULL) {
-		perror("malloc err");
-		exit(EXIT_FAILURE);
-	}
-	for (int i = 0; i < m; i++)
-		if ((*(fbuf + i) = malloc(sizeof(char) * m)) == NULL) {
-			perror("malloc err");
-			exit(EXIT_FAILURE);
-		}
-	if ((f = fopen(T_INPTF_PATH, "r")) == NULL) {
-		if (errno = ENOENT)
-			fprintf(stderr, "%s\n", "No file to translate! Maybe run the generator first to make some enciphered text?");
-		else
-			perror("fopen err");
-		exit(EXIT_FAILURE);
-	}
-	while ((c = fgetc(f)) != EOF) {				//OUTER LOOP CHECKING FOR END OF FILE
-		printf("%s\n", "startloop");
-		if (ungetc(c, f) == EOF) {
-			perror("ungetc err");
-			exit(EXIT_FAILURE);
-		}
-		if (b == d) {
-			if ((fdummy = realloc(fbuf, sizeof(char *) * (d *= 2))) == NULL) {
-				perror("realloc err");
-				exit(EXIT_FAILURE);
-			}
-			fbuf = fdummy;
-		}
-		n = 0;
-		printf("%s\n", "writechecker");
-		while ((c = fgetc(f)) != SPACE) {		//INNER LOOP CHECKING FOR END OF CIPHERED WORD
-		printf("%d\t", n);
-			if (n == m) {
-				if ((dummy = realloc(*(fbuf + b), sizeof(char) * (m *= 2))) == NULL) {
-					perror("realloc err");
-					exit(EXIT_FAILURE);
-				}
-				*(fbuf + b) = dummy;
-			}
-			*(*(fbuf + b) + (n++)) = c;
-		}
-		printf("\n%s\n", "gangsucess!");
-		while ((c = fgetc(f)) == SPACE);
-		if (ungetc(c, f) == EOF) {
-			perror("ungetc err");
-			exit(EXIT_FAILURE);
-		}
-		b++;
-	}
-	if (fclose(f) == -1) {
-		perror("fclose err");
-		exit(EXIT_FAILURE);
-	}
-	return fbuf;
+	key_bxe k;
 
-}
-
-void write_to_outptf(char **red) {
-
-	FILE *f;
-	
+	k = determine_key(*buf);
+	printf("The key is %d!\n", k);
 	if ((f = fopen(T_OUTPTF_PATH, "w")) == NULL) {
 		perror("fopen err");
+		exit(EXIT_FAILURE);
+	}
+	for (int i = 0; i < a -> strsize; i++) {
+		if (fputc(pls_decipher(*(buf + i), k), f) == EOF) {
+			perror("fputc err");
+			exit(EXIT_FAILURE);
+		}
+		free(*(buf + i));
+	}
+	for (int i = a -> strsize; i < a -> nmallocd; i++)
+		free(*(buf + i));
+	free(buf);
+	free(a);
+	if (fclose(f) == -1) {
+		perror("fclose err");
 		exit(EXIT_FAILURE);
 	}
 	

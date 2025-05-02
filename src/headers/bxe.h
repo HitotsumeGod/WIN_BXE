@@ -275,13 +275,13 @@
 
 typedef uint8_t key_bxe;
 
-extern const char *alphabet;
-
 extern void set_random_key(void);
 extern void prep_file(char *filename);
-extern void write_to_outptf(char *buffer_read, amounts *a);
+extern realloc_mode pick_realloc_mode(void); 
+extern void gen_write(char *buffer_read, amounts *a);
+extern void trans_write(char **buffer_read, amounts *a);
 char *pls_encipher(char tocipher, key_bxe key);
 char pls_decipher(char *deciferable, key_bxe key);
-key_bxe determine_key(char *deciferable); 
+key_bxe determine_key(char *deciferable);
 
 #endif //__BXE_H__

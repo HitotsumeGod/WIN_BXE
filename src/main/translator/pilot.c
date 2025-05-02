@@ -5,6 +5,15 @@
 
 int main(int argc, char *argv[]) {
 
-	read_from_inptf();
+	amounts *ab;
+	char **strs;
+	char spc[1];
+
+	spc[0] = SPACE;
+	if ((ab = file_to_strings(T_INPTF_PATH, spc, &strs, DOUBLE)) < 0) {
+		perror("file_to_strings err");
+		return -1;
+	}
+	trans_write(strs, ab);
 
 }

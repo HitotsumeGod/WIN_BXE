@@ -10,9 +10,11 @@ TS=$(SRC)/translator/pilot.c $(SRC)/translator/translator.c
 
 all: generator translator
 generator: $(GS) $(RES)
-	$(CC) -o $@ $(GS) -I $(DEPS) -L $(LIBPATH) -lsprocr -g
-translator: $(TS) $(DEPS) $(RES)
-	$(CC) -o $@ $(TS) -I $(DEPS)
+	$(CC) -o $@ $(GS) -I $(DEPS) -L $(LIBPATH) -lsprocr 
+translator: $(TS) $(RES)
+	$(CC) -o $@ $(TS) -I $(DEPS) -L $(LIBPATH) -lsprocr
+g.s: $(GS) 
+	$(CC) -S $^ -I $(DEPS) -fno-asynchronous-unwind-tables -fno-ident -fomit-frame-pointer -masm=intel
 edit:
 	$(ED) src/main/generator/*.c &
 	$(ED) src/main/translator/*.c 
@@ -24,4 +26,6 @@ $(RES):
 clean: 
 	rm -f generator
 	rm -f translator
+	rm -f *.s
+	rm -f *.o
 	rm -rf res
