@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <time.h>
 #include "bxe.h"
@@ -19,7 +20,7 @@ int main(int argc, char *argv[]) {
 	} else if (argc > 1)
 		prep_file(argv[1]);
 	if ((ab = file_to_single_string(G_INPTF_PATH, &prim)) == NULL) {
-		fprintf(stderr, "File_to_single_string err : %d\n", errno);
+		pstrerror(errno);
 		return -1;
 	}
 	set_random_key();

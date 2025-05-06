@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
 #include <time.h>
 #include "bxe.h"
 
@@ -13,7 +15,7 @@ int main(int argc, char *argv[]) {
 	st = (double) clock() / CLOCKS_PER_SEC;
 	spc[0] = NIGHT;
 	if ((ab = file_to_strings(T_INPTF_PATH, spc, &strs)) < 0) {
-		perror("file_to_strings err");
+		pstrerror(errno);
 		return -1;
 	}
 	trans_write(strs, ab);

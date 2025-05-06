@@ -1,6 +1,5 @@
 #makec generated makefile
 CC=gcc
-ED=vim
 SRC=src/main
 DEPS=src/headers -I /usr/local/include
 RES=res
