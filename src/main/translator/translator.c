@@ -89,9 +89,13 @@ amounts *file_to_strings(char *fname, char *delim, char ***buf) {
                                 }
 			//printf("\nTL reallocates to %zu bytes.\n", sizeof(char *) * d);
                 }
-                while ((c = fgetc(f)) != EOF && c != *delim) {
+                while ((c = fgetc(f)) != EOF) {
 			//printf("\nLLoop iteration %d.\n", n + 1);
-                        if (n == m) {
+                        if (c == *delim) {
+				while ((c = fgetc(f)) == *delim);
+				ungetc(c, f);
+				break;
+			} if (n == m) {
                                 if ((dummy = realloc(*(strs + b), sizeof(char) * (m *= 2))) == NULL) {
                                         errno = REALLOC_ERR;
                                         return NULL;
@@ -138,7 +142,7 @@ void trans_write(char **buf, amounts *a) {
 		exit(EXIT_FAILURE);
 	}
 	for (int i = 0; i < a -> strsize; i++) {
-		if (fputc(pls_decipher(*(buf + i), k), f) == EOF) {
+		if (fputc(LOWERCASE(pls_decipher(*(buf + i), k)), f) == EOF) {
 			perror("fputc err");
 			exit(EXIT_FAILURE);
 		}
