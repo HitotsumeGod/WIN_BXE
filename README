@@ -4,7 +4,7 @@ WIN_BXE is a cipher program that, rather than relying on a single static key, ge
 To build:
 make
 To use:
-./generator <filename> (this deletes the file used, and stores its contents internally, so for subsequent attempts with the same file, just use ./generator with no arguments
+./generator <filename> (this deletes the file used, and stores its contents internally, so for subsequent attempts with the same file, just use ./generator with no arguments)
 ./translator
 the enciphered and deciphered text files can be found in the 'res' directory
 cipher character key:
