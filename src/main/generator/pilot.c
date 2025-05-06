@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	} else if (argc > 1)
 		prep_file(argv[1]);
-	if ((ab = file_to_single_string(G_INPTF_PATH, &prim, DOUBLE)) == NULL) {
+	if ((ab = file_to_single_string(G_INPTF_PATH, &prim)) == NULL) {
 		fprintf(stderr, "File_to_single_string err : %d\n", errno);
 		return -1;
 	}

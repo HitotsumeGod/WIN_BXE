@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <errno.h>
 #include "bxe.h"
 
@@ -11,11 +12,9 @@ key_bxe determine_key(char *decipherable) {
 	char *tofree;
 	key_bxe k = 0;
 
-	printf("%s\n", decipherable);
 	for (int i = KEY_MIN; i <= KEY_MAX; i++) 
 		for (int il = 0; il < strlen(alphabet); il++) {
 			if (strcmp(decipherable, (tofree = pls_encipher(*(alphabet + il), i))) == 0) {
-				printf("Tofree : %s\n", tofree);
 				free(tofree);
 				return i;
 			} else
@@ -35,6 +34,95 @@ char pls_decipher(char *decipherable, key_bxe k) {
 		} else
 			free(tofree);
 	return '?';
+
+}
+
+amounts *file_to_strings(char *fname, char *delim, char ***buf) {
+
+        amounts *a;
+        FILE *f;
+        char **strs, **fdummy, *dummy;
+        int c, n, m, b, d;
+	bool mdelim;
+
+        b = 0;
+        m = d = 2;
+	mdelim = false;
+	if (!delim) {
+		if ((delim = malloc(sizeof(char))) == NULL) {
+			errno = MALLOC_ERR;
+			return NULL;
+		}
+		*delim = '\n';
+		mdelim = true;
+	}
+        if ((strs = malloc(sizeof(char *) * d)) == NULL || (a = malloc(sizeof(amounts))) == NULL) {
+                errno = MALLOC_ERR;
+                return NULL;
+        }
+	//printf("\nInitial toplevel array malloc is %zu bytes.\n", sizeof(char *) * d);
+        for (int i = 0; i < d; i++) 
+                if ((*(strs + i) = malloc(sizeof(char) * m)) == NULL) {
+                        errno = MALLOC_ERR;
+                        return NULL;
+                }
+	//printf("\n%d lower arrays are each malloc'd %zu bytes.\n", d, sizeof(char) * m);
+        if ((f = fopen(fname, "r")) == NULL) { 
+                errno = FOPEN_ERR;
+                return NULL;
+        }
+        while ((c = fgetc(f)) != EOF) {
+		//printf("\nTLoop iteration %d.\n", b + 1);
+                n = 0;
+		m = 2;
+                ungetc(c, f);
+                if (b == d) {
+                        if ((fdummy = realloc(strs, sizeof(char *) * (d *= 2))) == NULL) {
+                                errno = REALLOC_ERR;
+                                return NULL;
+                        }
+                        strs = fdummy;
+                        for (int i = d / 2; i < d; i++)
+                                if ((*(strs + i) = malloc(sizeof(char) * m)) == NULL) {
+                                        errno = MALLOC_ERR;
+                                        return NULL;
+                                }
+			//printf("\nTL reallocates to %zu bytes.\n", sizeof(char *) * d);
+                }
+                while ((c = fgetc(f)) != EOF && c != *delim) {
+			//printf("\nLLoop iteration %d.\n", n + 1);
+                        if (n == m) {
+                                if ((dummy = realloc(*(strs + b), sizeof(char) * (m *= 2))) == NULL) {
+                                        errno = REALLOC_ERR;
+                                        return NULL;
+                                }
+                                *(strs + b) = dummy;
+                        	//printf("\nLL %d reallocates to %zu bytes.\n", b, sizeof(char) * m);
+			}
+			//printf("\nCharacter is placed into LL %d at position %d.\n", b, n);
+                        *(*(strs + b) + (n++)) = c;
+                }
+                if (n == m++) {
+                        if ((dummy = realloc(*(strs + b), sizeof(char) * m)) == NULL) {
+                                errno = REALLOC_ERR;
+                                return NULL;
+                        }
+			//printf("\nLL %d reallocates to %zu bytes outside of mini loop.\n", b, sizeof(char) * m + 1);
+                        *(strs + b) = dummy;
+                }
+		//printf("\nNull byte is placed into LL %d at position %d.\n", b, n);
+                *(*(strs + (b++)) + n) = '\0';
+        }
+	if (mdelim)
+		free(delim);
+        if (fclose(f) == -1) {
+                errno = FCLOSE_ERR;
+                return NULL;
+        }
+        *buf = strs;
+        a -> strsize = b;
+        a -> nmallocd = d;
+        return a;
 
 }
 
@@ -65,7 +153,6 @@ void trans_write(char **buf, amounts *a) {
 		exit(EXIT_FAILURE);
 	}
 	
-
 }
 
 char *pls_encipher(char c, key_bxe k) {

@@ -6,7 +6,11 @@
 #include <time.h>
 #include "bxe.h"
 
+void *set_realloc_mode(realloc_mode m);
+
 key_bxe tkey;
+
+void *set_realloc_mode(realloc_mode mo) { return NULL; }
 
 void set_random_key(void) { srand(time(NULL)); tkey = RANDOMRANGE(KEY_MAX, KEY_MIN); printf("Random key is %d\n", tkey); }
 
@@ -83,6 +87,52 @@ void prep_file(char *fname) {
 		perror("fclose err");
 		exit(EXIT_FAILURE);
 	}
+
+}
+
+amounts *file_to_single_string(char *fname, char **buf) {
+
+        amounts *a;
+        FILE *f;
+        char *str, *dummy;
+        int c, n, m;
+
+        n = 0;
+        m = 2;
+        if ((str = malloc(sizeof(char) * m)) == NULL || (a = malloc(sizeof(amounts))) == NULL) {
+                errno = MALLOC_ERR;
+                return NULL;
+        }
+        if ((f = fopen(fname, "r")) == NULL) {
+                errno = FOPEN_ERR;
+                return NULL;
+        }
+        while ((c = fgetc(f)) != EOF) {
+                if (n == m) {
+                        if ((dummy = realloc(str, sizeof(char) * (m *= 2))) == NULL) {
+                                errno = REALLOC_ERR;
+                                return NULL;
+                        }
+                        str = dummy;
+                }
+                *(str + (n++)) = c;
+        }
+        if (n == m++) {
+                if ((dummy = realloc(str, sizeof(char) * m)) == NULL) {
+                        errno = REALLOC_ERR;
+                        return NULL;
+                }
+                str = dummy;
+        }
+        if (fclose(f) == -1) {
+                errno = FCLOSE_ERR;
+                return NULL;
+        }
+        *(str + (n--)) = '\0';
+        *buf = str;
+        a -> strsize = n;
+        a -> nmallocd = m;
+        return a;
 
 }
 
