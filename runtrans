@@ -1,7 +1,0 @@
-#!/bin/bash
-
-cat Generator/outptf > Translator/inptf
-javac Translator/main/*.java
-java Translator/main/Pilot
-cat Translator/outptf
-echo
