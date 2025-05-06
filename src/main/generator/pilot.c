@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <time.h>
 #include "bxe.h"
 
 #define AXXC_LOL
@@ -9,7 +10,9 @@ int main(int argc, char *argv[]) {
 	
 	amounts *ab;
 	char *prim;
+	double st, ent;
 
+	st = (double) clock() / CLOCKS_PER_SEC;
 	if (argc > 2) {
 		fprintf(stderr, "%s\n", "--- Usage : ./generator <filename> ---");
 		return EXIT_FAILURE;
@@ -21,6 +24,11 @@ int main(int argc, char *argv[]) {
 	}
 	set_random_key();
 	gen_write(prim, ab);
+	ent = (double) clock() / CLOCKS_PER_SEC;
+	if (ent - st < 1)
+		printf("Executed in %.6f milliseconds!\n", 1000 * (ent - st));
+	else
+		printf("Executed in %.6f seconds!\n", ent - st);
 	return 0;
 
 }

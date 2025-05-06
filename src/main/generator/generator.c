@@ -153,16 +153,18 @@ void gen_write(char *buf, amounts *a) {
 	}
 	n = 0;
 	for (int i = 0; i < a -> strsize; i++) {
-		if (*(buf + i) < 123 && *(buf + i) > 96) 
+		if (*(buf + i) < 123 && *(buf + i) > 96) {
 			if (fputs((*(enciphered_strs + (n++)) = pls_encipher(CAPITALIZE(*(buf + i)), tkey)), f) == EOF) {
 				perror("fputs err");
 				exit(EXIT_FAILURE);
 			}
-		else if (*(buf + i) < 91 && *(buf + i) > 64) 
-			if (fputs((*(enciphered_strs + (n++)) = pls_encipher(LOWERCASE(*(buf + i)), tkey)), f) == EOF) {
+		} else if ((*(buf + i) < 91 && *(buf + i) > 64) || *(buf + i) == 32) {
+			if (fputs((*(enciphered_strs + (n++)) = pls_encipher(*(buf + i), tkey)), f) == EOF) {
 				perror("fputs err");
 				exit(EXIT_FAILURE);
 			}
+		} else
+			continue;
 		if (fputs((*(enciphered_strs + (n++)) = pls_encipher(NIGHT, tkey)), f) == EOF) {
 			perror("fputs err");
 			exit(EXIT_FAILURE);
@@ -269,12 +271,18 @@ char *pls_encipher(char c, key_bxe k) {
 		case 'Z':
 			BXE_Z(k, str);
 			break;
+		case ' ':
+			for (cs = 0; cs < 4; cs++)
+				*(str + cs) = SPACE;
+			*(str + cs) = '\0';
+			break;
 		case NIGHT:
 			BXE_NIGHT(k, str);
 			break;
 		default:
-			fprintf(stderr, "%s\n", "kinda sorta maybe");
-			str = "";
+			free(str);
+			fprintf(stderr, "Erroneous encipher call with character [[ %d ]]. Ensure that no non-alphabet characters are being read in. \n", c);
+			exit(EXIT_FAILURE);
 	}
 	return str;
 

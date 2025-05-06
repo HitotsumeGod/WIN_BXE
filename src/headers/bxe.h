@@ -92,7 +92,7 @@
 		*(decipherable + cs) = '\0';			
 	#define BXE_J(key, decipherable)					\
 		cs = 0;								\
-		for (int i = 0; i < (key / 2) + 16; i++)			\
+		for (int i = 0; i < (key * 2) + 16; i++)			\
 			*(decipherable + (cs++)) = '?';				\
 		*(decipherable + (cs++)) = '*';					\
 		for (int i = 0; i < 2; i++)					\
@@ -156,7 +156,7 @@
 		*(decipherable + cs) = '\0';			
 	#define BXE_Q(key, decipherable)					\
 		cs = 0;								\
-		for (int i = 0; i < (key - (key / 2) + (key / 4)); i++)		\
+		for (int i = 0; i < (key - key + (key * 4)); i++)		\
 			*(decipherable + (cs++)) = '*';				\
 		*(decipherable + (cs++)) = '&';					\
 		*(decipherable + (cs++)) = '^';					\
@@ -238,8 +238,8 @@
 			*(decipherable + (cs++)) = '$';				\
 		*(decipherable + (cs++)) = '?';					\
 		*(decipherable + cs) = '\0';
-	#define BXE_NIGHT(key, decipherable)				\
-		cs = 0;											\
+	#define BXE_NIGHT(key, decipherable)					\
+		cs = 0;								\
 		for (int i = 0; i < key; i++)					\
 			*(decipherable + (cs++)) = NIGHT;			\
 		*(decipherable + cs) = '\0'; 			

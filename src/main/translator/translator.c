@@ -27,6 +27,9 @@ key_bxe determine_key(char *decipherable) {
 char pls_decipher(char *decipherable, key_bxe k) {
 
 	char *tofree;
+
+	if (strcmp(decipherable, "||||") == 0)
+		return 32;
 	for (int i = 0; i < strlen(alphabet); i++)
 		if (strcmp(decipherable, (tofree = pls_encipher(*(alphabet + i), k))) == 0) {
 			free(tofree);
@@ -60,19 +63,16 @@ amounts *file_to_strings(char *fname, char *delim, char ***buf) {
                 errno = MALLOC_ERR;
                 return NULL;
         }
-	//printf("\nInitial toplevel array malloc is %zu bytes.\n", sizeof(char *) * d);
         for (int i = 0; i < d; i++) 
                 if ((*(strs + i) = malloc(sizeof(char) * m)) == NULL) {
                         errno = MALLOC_ERR;
                         return NULL;
                 }
-	//printf("\n%d lower arrays are each malloc'd %zu bytes.\n", d, sizeof(char) * m);
         if ((f = fopen(fname, "r")) == NULL) { 
                 errno = FOPEN_ERR;
                 return NULL;
         }
         while ((c = fgetc(f)) != EOF) {
-		//printf("\nTLoop iteration %d.\n", b + 1);
                 n = 0;
 		m = 2;
                 ungetc(c, f);
@@ -87,10 +87,8 @@ amounts *file_to_strings(char *fname, char *delim, char ***buf) {
                                         errno = MALLOC_ERR;
                                         return NULL;
                                 }
-			//printf("\nTL reallocates to %zu bytes.\n", sizeof(char *) * d);
                 }
                 while ((c = fgetc(f)) != EOF) {
-			//printf("\nLLoop iteration %d.\n", n + 1);
                         if (c == *delim) {
 				while ((c = fgetc(f)) == *delim);
 				ungetc(c, f);
@@ -101,9 +99,7 @@ amounts *file_to_strings(char *fname, char *delim, char ***buf) {
                                         return NULL;
                                 }
                                 *(strs + b) = dummy;
-                        	//printf("\nLL %d reallocates to %zu bytes.\n", b, sizeof(char) * m);
 			}
-			//printf("\nCharacter is placed into LL %d at position %d.\n", b, n);
                         *(*(strs + b) + (n++)) = c;
                 }
                 if (n == m++) {
@@ -111,10 +107,8 @@ amounts *file_to_strings(char *fname, char *delim, char ***buf) {
                                 errno = REALLOC_ERR;
                                 return NULL;
                         }
-			//printf("\nLL %d reallocates to %zu bytes outside of mini loop.\n", b, sizeof(char) * m + 1);
                         *(strs + b) = dummy;
                 }
-		//printf("\nNull byte is placed into LL %d at position %d.\n", b, n);
                 *(*(strs + (b++)) + n) = '\0';
         }
 	if (mdelim)
@@ -133,19 +127,42 @@ amounts *file_to_strings(char *fname, char *delim, char ***buf) {
 void trans_write(char **buf, amounts *a) {
 
 	FILE *f;
+	char c;
 	key_bxe k;
 	
-	k = determine_key(*buf);
+	k = 0;
+	for (int i = 0; i < a -> strsize; i++) 
+		if (strcmp(*(buf + i), "||||") != 0) {
+			k = determine_key(*buf + i);
+			if (k)
+				break;
+		}
+	if (!k) {
+		fprintf(stderr, "%s\n", "file is just spaces bruh");
+		exit(EXIT_FAILURE);
+	}
 	printf("The key is %d!\n", k);
 	if ((f = fopen(T_OUTPTF_PATH, "w")) == NULL) {
 		perror("fopen err");
 		exit(EXIT_FAILURE);
 	}
 	for (int i = 0; i < a -> strsize; i++) {
-		if (fputc(LOWERCASE(pls_decipher(*(buf + i), k)), f) == EOF) {
-			perror("fputc err");
+		if ((c = pls_decipher(*(buf + i), k)) == '?') {
+			fprintf(stderr, "%s\n", "pls_decipher error: Unknown character to be read.");
+			fprintf(stderr, "Erroneous string : %s\n", *(buf + i));
 			exit(EXIT_FAILURE);
 		}
+			if (c < 91 && c > 64) {
+				if (fputc(LOWERCASE(c), f) == EOF) {
+					perror("fputc err");
+					exit(EXIT_FAILURE);
+				}
+			} else if ((c < 123 && c > 96) || c == 32) {
+				if (fputc(c, f) == EOF) {
+					perror("fputc err");
+					exit(EXIT_FAILURE);
+				}
+			}
 		free(*(buf + i));
 	}
 	for (int i = a -> strsize; i < a -> nmallocd; i++)
@@ -160,97 +177,105 @@ void trans_write(char **buf, amounts *a) {
 }
 
 char *pls_encipher(char c, key_bxe k) {
-	
-	char *str;
-	int cs;
-	
-	if ((str = malloc(sizeof(char) * (k * 30))) == NULL) {
-		perror("malloc err");
-		exit(EXIT_FAILURE);
-	}
-	switch (c) {
-		case 'A':
-			BXE_A(k, str);
-			break;
-		case 'B':
-			BXE_B(k, str);
-			break;
-		case 'C':
-			BXE_C(k, str);
-			break;
-		case 'D':
-			BXE_D(k, str);
-			break;
-		case 'E':
-			BXE_E(k, str);
-			break;
-		case 'F':
-			BXE_F(k, str);
-			break;
-		case 'G':
-			BXE_G(k, str);
-			break;
-		case 'H':
-			BXE_H(k, str);
-			break;
-		case 'I':
-			BXE_I(k, str);
-			break;
-		case 'J':
-			BXE_J(k, str);
-			break;
-		case 'K':
-			BXE_K(k, str);
-			break;
-		case 'L':
-			BXE_L(k, str);
-			break;
-		case 'M':
-			BXE_M(k, str);
-			break;
-		case 'N':
-			BXE_N(k, str);
-			break;
-		case 'O':
-			BXE_O(k, str);
-			break;
-		case 'P':
-			BXE_P(k, str);
-			break;
-		case 'Q':
-			BXE_Q(k, str);
-			break;
-		case 'R':
-			BXE_R(k, str);
-			break;
-		case 'S':
-			BXE_S(k, str);
-			break;
-		case 'T':
-			BXE_T(k, str);
-			break;
-		case 'U':
-			BXE_U(k, str);
-			break;
-		case 'V':
-			BXE_V(k, str);
-			break;
-		case 'W':
-			BXE_W(k, str);
-			break;
-		case 'X':
-			BXE_X(k, str);
-			break;
-		case 'Y':
-			BXE_Y(k, str);
-			break;
-		case 'Z':
-			BXE_Z(k, str);
-			break;
-		default:
-			fprintf(stderr, "%s\n", "kinda sorta maybe");
-			str = "";
-	}
-	return str;
+
+        char *str;
+        int cs;
+
+        if ((str = malloc(sizeof(char) * (k * 30))) == NULL) {
+                perror("malloc err");
+                exit(EXIT_FAILURE);
+        }
+        switch (c) {
+                case 'A':
+                        BXE_A(k, str);
+                        break;
+                case 'B':
+                        BXE_B(k, str);
+                        break;
+                case 'C':
+                        BXE_C(k, str);
+                        break;
+                case 'D':
+                        BXE_D(k, str);
+                        break;
+                case 'E':
+                        BXE_E(k, str);
+                        break;
+                case 'F':
+                        BXE_F(k, str);
+                        break;
+                case 'G':
+                        BXE_G(k, str);
+                        break;
+                case 'H':
+                        BXE_H(k, str);
+                        break;
+                case 'I':
+                        BXE_I(k, str);
+                        break;
+                case 'J':
+                        BXE_J(k, str);
+                        break;
+                case 'K':
+                        BXE_K(k, str);
+                        break;
+                case 'L':
+                        BXE_L(k, str);
+                        break;
+                case 'M':
+                        BXE_M(k, str);
+                        break;
+                case 'N':
+                        BXE_N(k, str);
+                        break;
+                case 'O':
+                        BXE_O(k, str);
+                        break;
+                case 'P':
+                        BXE_P(k, str);
+                        break;
+                case 'Q':
+                        BXE_Q(k, str);
+                        break;
+                case 'R':
+                        BXE_R(k, str);
+                        break;
+                case 'S':
+                        BXE_S(k, str);
+                        break;
+                case 'T':
+                        BXE_T(k, str);
+                        break;
+                case 'U':
+                        BXE_U(k, str);
+                        break;
+                case 'V':
+                        BXE_V(k, str);
+                        break;
+                case 'W':
+                        BXE_W(k, str);
+                        break;
+                case 'X':
+                        BXE_X(k, str);
+                        break;
+                case 'Y':
+                        BXE_Y(k, str);
+                        break;
+                case 'Z':
+                        BXE_Z(k, str);
+                        break;
+                case ' ':
+                        for (cs = 0; cs < 4; cs++)
+                                *(str + cs) = SPACE;
+                        break;
+                case NIGHT:
+                        BXE_NIGHT(k, str);
+                        break;
+                default:
+                        free(str);
+                        fprintf(stderr, "Erroneous encipher call with character [[ %d ]]. Ensure that no non-alphabet characters are being read in. \n", c);
+                        exit(EXIT_FAILURE);
+        }
+        return str;
 
 }

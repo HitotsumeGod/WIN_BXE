@@ -1,6 +1,6 @@
 #makec generated makefile
 CC=gcc
-ED=subl
+ED=vim
 SRC=src/main
 DEPS=src/headers -I /usr/local/include
 RES=res
@@ -9,15 +9,13 @@ TS=$(SRC)/translator/pilot.c $(SRC)/translator/translator.c
 
 all: generator translator
 generator: $(GS) $(RES)
-	$(CC) -o $@ $(GS) -I $(DEPS)
+	$(CC) -O3 -o $@ $(GS) -I $(DEPS) 
 translator: $(TS) $(RES)
-	$(CC) -o $@ $(TS) -I $(DEPS) 
+	$(CC) -O3 -o $@ $(TS) -I $(DEPS) 
 g.s: $(GS) 
 	$(CC) -S $^ -I $(DEPS) -fno-asynchronous-unwind-tables -fno-ident -fomit-frame-pointer -masm=intel
-edit:
-	$(ED) src/main/generator/*.c &
-	$(ED) src/main/translator/*.c 
-	$(ED) src/headers/*
+t.s: $(TS)
+	$(CC) -S $^ -I $(DEPS) -fno-asynchronous-unwind-tables -fno-ident -fomit-frame-pointer -masm=intel
 $(RES):
 	if ! [ -d $@ ]; then		\
 		mkdir $@;		\
