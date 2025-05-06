@@ -11,9 +11,11 @@ key_bxe determine_key(char *decipherable) {
 	char *tofree;
 	key_bxe k = 0;
 
+	printf("%s\n", decipherable);
 	for (int i = KEY_MIN; i <= KEY_MAX; i++) 
 		for (int il = 0; il < strlen(alphabet); il++) {
 			if (strcmp(decipherable, (tofree = pls_encipher(*(alphabet + il), i))) == 0) {
+				printf("Tofree : %s\n", tofree);
 				free(tofree);
 				return i;
 			} else
@@ -40,7 +42,7 @@ void trans_write(char **buf, amounts *a) {
 
 	FILE *f;
 	key_bxe k;
-
+	
 	k = determine_key(*buf);
 	printf("The key is %d!\n", k);
 	if ((f = fopen(T_OUTPTF_PATH, "w")) == NULL) {
@@ -71,11 +73,11 @@ char *pls_encipher(char c, key_bxe k) {
 	char *str;
 	int cs;
 	
-	if ((str = malloc(sizeof(char) * (k * 10))) == NULL) {
+	if ((str = malloc(sizeof(char) * (k * 30))) == NULL) {
 		perror("malloc err");
 		exit(EXIT_FAILURE);
 	}
-	switch (CAPITALIZE(c)) {
+	switch (c) {
 		case 'A':
 			BXE_A(k, str);
 			break;
@@ -161,4 +163,3 @@ char *pls_encipher(char c, key_bxe k) {
 	return str;
 
 }
-
