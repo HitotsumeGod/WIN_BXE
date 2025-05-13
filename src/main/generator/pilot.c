@@ -1,27 +1,34 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include <errno.h>
 #include "bxe.h"
 
 #define AXXC_LOL
 
 int main(int argc, char *argv[]) {
-	
+
+	amounts *ab;
 	char *prim;
-	size_t t;
+	double st, ent;
 	
-	if (argc != 2) {
-		printf("%s\n", "2 args bruh");
-		return 1;	
+	st = (double) clock() / CLOCKS_PER_SEC;
+	if (argc > 2) {
+		fprintf(stderr, "%s\n", "--- Usage : ./generator <filename> ---");
+		return EXIT_FAILURE;
+	} else if (argc > 1)
+		prep_file(argv[1]);
+	if ((ab = file_to_single_string(G_INPTF_PATH, &prim)) == NULL) {
+		pstrerror(errno);
+		return -1;
 	}
-	prim = malloc(sizeof(char) * 2);
 	set_random_key();
-	printf("%s\n", "Random key set.");
-	prep_file(argv[1]);
-	printf("%s\n", "Input file prepped.");
-	t = read_from_inptf(&prim);
-	printf("%s\n", "Reading complete.");
-	write_to_outptf(prim, t);
-	printf("%s\n", "Execution completed.");
+	gen_write(prim, ab);
+	ent = (double) clock() / CLOCKS_PER_SEC;
+	if (ent - st < 1)
+		printf("Executed in %.6f milliseconds!\n", 1000 * (ent - st));
+	else
+		printf("Executed in %.6f seconds!\n", ent - st);
 	return 0;
 
 }

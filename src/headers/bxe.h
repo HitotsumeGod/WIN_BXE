@@ -2,7 +2,7 @@
 #define __BXE_H__
 
 #include <stdint.h>
-#include <stddef.h>
+#include "pprocessor.h"
 
 #define RANDOMRANGE(max, min) rand() % (max + 1 - min) + min
 
@@ -92,7 +92,7 @@
 		*(decipherable + cs) = '\0';			
 	#define BXE_J(key, decipherable)					\
 		cs = 0;								\
-		for (int i = 0; i < (key / 2) + 16; i++)			\
+		for (int i = 0; i < (key * 2) + 16; i++)			\
 			*(decipherable + (cs++)) = '?';				\
 		*(decipherable + (cs++)) = '*';					\
 		for (int i = 0; i < 2; i++)					\
@@ -156,7 +156,7 @@
 		*(decipherable + cs) = '\0';			
 	#define BXE_Q(key, decipherable)					\
 		cs = 0;								\
-		for (int i = 0; i < (key - (key / 2) + (key / 4)); i++)		\
+		for (int i = 0; i < (key - key + (key * 4)); i++)		\
 			*(decipherable + (cs++)) = '*';				\
 		*(decipherable + (cs++)) = '&';					\
 		*(decipherable + (cs++)) = '^';					\
@@ -238,21 +238,24 @@
 			*(decipherable + (cs++)) = '$';				\
 		*(decipherable + (cs++)) = '?';					\
 		*(decipherable + cs) = '\0';
+	#define BXE_NIGHT(key, decipherable)					\
+		cs = 0;								\
+		for (int i = 0; i < key; i++)					\
+			*(decipherable + (cs++)) = NIGHT;			\
+		*(decipherable + cs) = '\0'; 			
 		
 #endif
 
 typedef uint8_t key_bxe;
 
-extern const char *alphabet;
-
 extern void set_random_key(void);
 extern void prep_file(char *filename);
-extern size_t read_from_inptf(char **buf);
-extern size_t read_from_intpl(char ***buf);
-extern void write_to_outptf(char *buffer_read, size_t bufsize);
-extern void write_to_outptl(char **buffer_read, size_t bufsize);
+extern realloc_mode pick_realloc_mode(void); 
+extern void gen_write(char *buffer_read, amounts *a);
+extern void trans_write(char **buffer_read, amounts *a);
 char *pls_encipher(char tocipher, key_bxe key);
 char pls_decipher(char *deciferable, key_bxe key);
-key_bxe determine_key(char *deciferable); 
+key_bxe determine_key(char *deciferable);
 
 #endif //__BXE_H__
+

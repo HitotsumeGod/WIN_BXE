@@ -1,21 +1,20 @@
 #makec generated makefile
 CC=gcc
-ED=gedit
 SRC=src/main
-DEPS=src/headers
+DEPS=src/headers -I /usr/local/include
 RES=res
 GS=$(SRC)/generator/pilot.c $(SRC)/generator/generator.c
 TS=$(SRC)/translator/pilot.c $(SRC)/translator/translator.c
 
 all: generator translator
-generator: $(GS) $(DEPS) $(RES)
-	$(CC) -o $@ $(GS) -I $(DEPS) -g
-translator: $(TS) $(DEPS) $(RES)
-	$(CC) -o $@ $(TS) -I $(DEPS) -g
-edit:
-	gedit src/main/generator/*.c &
-	gedit src/main/translator/*.c 
-	gedit src/headers/*
+generator: $(GS) $(RES)
+	$(CC) -O3 -o $@ $(GS) -I $(DEPS) 
+translator: $(TS) $(RES)
+	$(CC) -O3 -o $@ $(TS) -I $(DEPS) 
+g.s: $(GS) 
+	$(CC) -S $^ -I $(DEPS) -fno-asynchronous-unwind-tables -fno-ident -fomit-frame-pointer -masm=intel
+t.s: $(TS)
+	$(CC) -S $^ -I $(DEPS) -fno-asynchronous-unwind-tables -fno-ident -fomit-frame-pointer -masm=intel
 $(RES):
 	if ! [ -d $@ ]; then		\
 		mkdir $@;		\
@@ -23,4 +22,6 @@ $(RES):
 clean: 
 	rm -f generator
 	rm -f translator
+	rm -f *.s
+	rm -f *.o
 	rm -rf res

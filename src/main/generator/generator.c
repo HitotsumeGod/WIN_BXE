@@ -38,10 +38,10 @@ void prep_file(char *fname) {
 		perror("fclose err");
 		exit(EXIT_FAILURE);
 	}
-	/*if (unlink(fname) == -1) {
+	if (unlink(fname) == -1) {
 		perror("unlink err");
 		exit(EXIT_FAILURE);
-	}*/
+	}
 	if ((f = fopen(G_INPTF_PATH, "wb")) == NULL) {
 		perror("fopen err");
 		exit(EXIT_FAILURE);
@@ -58,69 +58,92 @@ void prep_file(char *fname) {
 
 }
 
-size_t read_from_inptf(char **buf) {
+amounts *file_to_single_string(char *fname, char **buf) {
 
-	FILE *f;
-	char *fbuf, *fdummy;
-	int c, n, m;
-	
-	fbuf = *buf;
-	n = 0;
-	m = 2;
-	if ((f = fopen(G_INPTF_PATH, "r")) == NULL) {
-		perror("fopen err");
-		exit(EXIT_FAILURE);
-	}
-	while ((c = fgetc(f)) != EOF) {
-		if (n == m) {
-			if ((fdummy = realloc(fbuf, sizeof(char) * (m *= 2))) == NULL) {
-				perror("realloc err");
-				exit(EXIT_FAILURE);
-			}
-			fbuf = fdummy;
-		}
-		if (c != '\n') 
-			*(fbuf + (n++)) = c;
-	}
-	return (size_t) n;
+        amounts *a;
+	struct stat *ss;
+        FILE *f;
+        char *str, *dummy;
+        int c, n, m;
+
+        n = 0;
+        m = 2;
+        if ((str = malloc(sizeof(char) * m)) == NULL || (a = malloc(sizeof(amounts))) == NULL) {
+                errno = MALLOC_ERR;
+                return NULL;
+        }
+        if ((f = fopen(fname, "r")) == NULL) {
+                errno = FOPEN_ERR;
+                return NULL;
+        }
+        while ((c = fgetc(f)) != EOF) {
+                if (n == m) {
+                        if ((dummy = realloc(str, sizeof(char) * (m *= 2))) == NULL) {
+                                errno = REALLOC_ERR;
+                                return NULL;
+                        }
+                        str = dummy;
+                }
+                *(str + (n++)) = c;
+        }
+        if (n == m++) {
+                if ((dummy = realloc(str, sizeof(char) * m)) == NULL) {
+                        errno = REALLOC_ERR;
+                        return NULL;
+                }
+                str = dummy;
+        }
+        if (fclose(f) == -1) {
+                errno = FCLOSE_ERR;
+                return NULL;
+        }
+        *(str + (n--)) = '\0';
+        *buf = str;
+        a -> strsize = n;
+        a -> nmallocd = m;
+        return a;
 
 }
 
-void write_to_outptf(char *buf, size_t bufsize) {
+
+void gen_write(char *buf, amounts *a) {
 
 	FILE *f;
-	char **ciphered, *enciphered;
+	char **enciphered_strs;
 	int n;
 	
-	n = 0;
-	if ((ciphered = malloc(sizeof(char *) * bufsize + 1)) == NULL) {
+	if ((enciphered_strs = malloc(sizeof(char *) * (a -> strsize * 2))) == NULL) {
 		perror("malloc err");
 		exit(EXIT_FAILURE);
 	}
-	for (int i = 0; i < bufsize; i++) {
-		enciphered = pls_encipher(*(buf + i), tkey);
-		if ((*(ciphered + bufsize) = malloc(sizeof(char) * strlen(enciphered) + 1)) == NULL) {
-			perror("malloc err");
-			exit(EXIT_FAILURE);
-		}
-		strcpy(*(ciphered + bufsize), enciphered);
-		free(enciphered);
-	}
-	*(ciphered + n) = "\0";
 	if ((f = fopen(G_OUTPTF_PATH, "w")) == NULL) {
 		perror("fopen err");
 		exit(EXIT_FAILURE);
 	}
-	for (int i = 0; i < bufsize; i++) {
-		if (fputs(*(ciphered + i), f) == EOF) {
+	n = 0;
+	for (int i = 0; i < a -> strsize; i++) {
+		if (*(buf + i) < 123 && *(buf + i) > 96) {
+			if (fputs((*(enciphered_strs + (n++)) = pls_encipher(CAPITALIZE(*(buf + i)), tkey)), f) == EOF) {
+				perror("fputs err");
+				exit(EXIT_FAILURE);
+			}
+		} else if ((*(buf + i) < 91 && *(buf + i) > 64) || *(buf + i) == 32) {
+			if (fputs((*(enciphered_strs + (n++)) = pls_encipher(*(buf + i), tkey)), f) == EOF) {
+				perror("fputs err");
+				exit(EXIT_FAILURE);
+			}
+		} else
+			continue;
+		if (fputs((*(enciphered_strs + (n++)) = pls_encipher(NIGHT, tkey)), f) == EOF) {
 			perror("fputs err");
 			exit(EXIT_FAILURE);
 		}
-		for (int il = 0; il < tkey / 2 + 1; il++)
-			fputc(SPACE, f);
-		free(*(ciphered + i));
 	}
-	free(ciphered);
+	for (int i = 0; i < n; i++)
+		free(*(enciphered_strs + i));
+	free(enciphered_strs);
+	free(buf);
+	free(a);
 	if (fclose(f) == -1) {
 		perror("fclose err");
 		exit(EXIT_FAILURE);
@@ -138,7 +161,7 @@ char *pls_encipher(char c, key_bxe k) {
 		perror("malloc err");
 		exit(EXIT_FAILURE);
 	}
-	switch (CAPITALIZE(c)) {
+	switch (c) {
 		case 'A':
 			BXE_A(k, str);
 			break;
@@ -217,9 +240,18 @@ char *pls_encipher(char c, key_bxe k) {
 		case 'Z':
 			BXE_Z(k, str);
 			break;
+		case ' ':
+			for (cs = 0; cs < 4; cs++)
+				*(str + cs) = SPACE;
+			*(str + cs) = '\0';
+			break;
+		case NIGHT:
+			BXE_NIGHT(k, str);
+			break;
 		default:
-			fprintf(stderr, "%s\n", "kinda sorta maybe");
-			str = "";
+			free(str);
+			fprintf(stderr, "Erroneous encipher call with character [[ %d ]]. Ensure that no non-alphabet characters are being read in. \n", c);
+			exit(EXIT_FAILURE);
 	}
 	return str;
 
